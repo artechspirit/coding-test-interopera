@@ -23,7 +23,7 @@ interface RegionChartProps {
 }
 
 export function RegionChart({ data }: RegionChartProps) {
-  const chartData: IRegionChart[] =
+  const chartData = Object.values(
     data?.reduce((acc: Record<string, IRegionChart>, rep) => {
       if (!acc[rep.region]) {
         acc[rep.region] = {
@@ -45,10 +45,9 @@ export function RegionChart({ data }: RegionChartProps) {
         else if (deal.status === "In Progress")
           acc[rep.region].inProgress += deal.value;
       });
-
       return acc;
-    }, {}) || [];
-
+    }, {}) || {}
+  );
   const formattedData = Object.values(chartData);
 
   return (
