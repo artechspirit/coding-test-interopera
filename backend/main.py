@@ -41,27 +41,26 @@ def get_data():
 async def ai_endpoint(request: Request):
     body = await request.json()
     user_question = body.get("question", "")
-    endpoint = os.getenv("OPENROUTER_API_ENDPOINT")
-    api_key = os.getenv("OPENROUTER_API_KEY")
+    api_key = os.getenv("HF_API_KEY")
+    model_id = os.getenv("HF_MODEL")
 
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                endpoint,
+                f"https://api-inference.huggingface.co/models/{model_id}",
                 headers={
                     "Authorization": f"Bearer {api_key}",
                     "Content-Type": "application/json",
                 },
-                json={
-                    "model": "openai/gpt-3.5-turbo",
-                    "messages": [{"role": "user", "content": user_question}],
-                },
+                json={"inputs": user_question}
             )
             response.raise_for_status()
             result = response.json()
-            return {"answer": result["choices"][0]["message"]["content"]}
+            # HF returns a list of generated text results
+            return {"answer": result[0]["generated_text"]}
     except Exception as e:
         return {"answer": f"Something went wrong: {str(e)}"}
+
 
 
 if __name__ == "__main__":
